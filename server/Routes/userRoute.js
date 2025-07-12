@@ -1,8 +1,12 @@
 import express from 'express';
 const router=express.Router();
 import UserController from '../controllers/user.js';
-
+import {authUser} from '../middleware/authUser.js';
 router.post('/register' ,UserController.register);
 router.post('/login', UserController.login);
-router.get('/profile/:id', UserController.getProfile);
+router.get('/logout', UserController.logout);
+router.get('/getprofile', authUser, UserController.getProfile);
+router.put('/updateprofile', authUser, UserController.updateProfile);
+router.delete('/deleteprofile', authUser, UserController.deleteUser);
+router.post('/setprofile', authUser, UserController.setprofile);
 export default router;
