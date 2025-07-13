@@ -1,4 +1,4 @@
-import Video from "../models/video.model.js";
+import Video from "../models/video.modal.js";
 export const likeVideo = async (req, res) => {
     const { videoId } = req.params;
     const userId = req.user._id;

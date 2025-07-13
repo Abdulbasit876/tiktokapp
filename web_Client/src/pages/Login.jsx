@@ -1,8 +1,9 @@
-
 import React, { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { Link, Router ,useNavigate} from "react-router-dom";
+import { Link ,useNavigate} from "react-router-dom";
+import axios from "axios";
+import { Base_Url } from "../services.js";
 
 const Login = () => {
     const formRef = useRef(null);
@@ -24,22 +25,25 @@ const Login = () => {
      const navigate = useNavigate();
    const RouteChange=()=>{
          navigate("/");
-       console.log("Redirecting to home page");
    }
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError("");
-        setTimeout(() => {
-            setLoading(false);
-            if (!form.email || !form.password) {
-                setError("Please enter both email and password.");
-            } else {
-               
+        try {
+            const response = await axios.post(`${Base_Url}/user/login`, form);
+            console.log(response);
+            if (response.status === 200) {
+                localStorage.setItem("token", response.data.token);
                 setError("");
                 RouteChange();
             }
-        }, 1200);
+        } catch (error) {
+            setError("Login failed.");
+            console.error("Login error:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

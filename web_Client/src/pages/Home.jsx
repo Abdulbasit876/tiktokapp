@@ -4,6 +4,9 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import VideoAutoPlay from "../components/VideoAutoPlay";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import axios from "axios";
+import { Base_Url } from "../services";
 
 // Dummy video data for demonstration
 const demoVideos = [
@@ -31,6 +34,25 @@ const Home = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [uploadData, setUploadData] = useState({ description: "", file: null });
   const uploadRef = useRef(null);
+  async function getProfile(){
+    try {
+      const response = await axios.get(`${Base_Url}/user/getprofile`,{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (response.status === 200) {
+        const userProfile = response.data;
+        setIsLoggedIn(true);
+        console.log("User profile fetched successfully:", userProfile);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  }
+  useEffect(() => {
+    getProfile();
+  }, []);
 
   useGSAP(() => {
     gsap.fromTo(

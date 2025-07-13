@@ -44,7 +44,7 @@ class UserController {
         process.env.JWT_SECRET || "ksjdjbchbiyfguhjbchjbcheqbv",
         { expiresIn: "1h" }
       );
-     res.cookie("token",token).json("Login Sucessfully")
+     res.cookie("token",token).json({"message":"Login Sucessfully","token":token})
     } catch (err) {
       res.status(500).json({ message: "Server error", error: err.message });
     }

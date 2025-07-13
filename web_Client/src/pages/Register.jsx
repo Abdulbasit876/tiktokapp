@@ -2,7 +2,9 @@
 import React, { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Base_Url } from "../services.js";
 
 const Register = () => {
   const formRef = useRef(null);
@@ -10,7 +12,8 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+ const navigate = useNavigate();
+ 
   useGSAP(() => {
     gsap.fromTo(
       formRef.current,
@@ -23,20 +26,27 @@ const Register = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
-    setTimeout(() => {
-      setLoading(false);
-      if (!form.username || !form.email || !form.password) {
-        setError("Please fill all fields.");
-      } else {
-        setError("");
-        setSuccess("Registration successful!");
+    try {
+      const response = await axios.post(`${Base_Url}/user/register`, form);
+      if (response.status === 201) {
+        setError("")
+        setSuccess("Registration successful! You can now log in.");
+        setForm({ username: "", email: "", password: "" });
+        navigate("/login"); 
       }
-    }, 1400);
+     
+
+    } catch (error) {
+      setError("Registration failed.");
+      console.error("Registration error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="min-h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500">

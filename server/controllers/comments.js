@@ -1,5 +1,4 @@
-import Video from "../models/video.model.js";
-
+import Video from "../models/video.modal.js";
 export const commentsController = async (req,res)=>{
     const { videoId } = req.params;
     const { comment } = req.body;
