@@ -24,7 +24,6 @@ class UserController {
       res.status(500).json({ message: "Server error", error: err.message });
     }
   }
-
   static async login(req, res) {
     try {
       const { email, password } = req.body;
@@ -42,7 +41,6 @@ class UserController {
       const token = jwt.sign(
         { _id: user._id, username: user.username, email: user.email },
         process.env.JWT_SECRET || "ksjdjbchbiyfguhjbchjbcheqbv",
-        { expiresIn: "1h" }
       );
      res.cookie("token",token).json({"message":"Login Sucessfully","token":token})
     } catch (err) {
@@ -108,7 +106,6 @@ class UserController {
       res.status(500).json({ message: "Server error", error: err.message });
     }
   }
-
   // Delete user
   static async deleteUser(req, res) {
     try {
@@ -125,5 +122,4 @@ class UserController {
     }
   }
 }
-
 export default UserController;

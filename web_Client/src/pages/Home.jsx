@@ -8,37 +8,19 @@ import { useEffect } from "react";
 import axios from "axios";
 import { Base_Url } from "../services";
 
-// Dummy video data for demonstration
-const demoVideos = [
-  {
-    id: 1,
-    url: "https://www.w3schools.com/html/mov_bbb.mp4",
-    username: "@tiktokuser1",
-    description: "Check out this cool video! #foryou",
-    likes: 1200,
-    comments: 45,
-  },
-  {
-    id: 2,
-    url: "https://www.w3schools.com/html/movie.mp4",
-    username: "@tiktokuser2",
-    description: "Amazing dance moves!",
-    likes: 980,
-    comments: 30,
-  },
-];
+
 
 const Home = () => {
-  const [videos, setVideos] = useState(demoVideos);
+  const [videos, setVideos] = useState([]);
   const [showUpload, setShowUpload] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [uploadData, setUploadData] = useState({ description: "", file: null });
   const uploadRef = useRef(null);
-  async function getProfile(){
+  async function getProfile(token){
     try {
       const response = await axios.get(`${Base_Url}/user/getprofile`,{
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       if (response.status === 200) {
@@ -50,8 +32,30 @@ const Home = () => {
       console.error("Error fetching profile:", error);
     }
   }
+   const fetchVideos = async () => {
+    try {
+      const response = await axios.get(`${Base_Url}/video/getAll`,{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (response.status === 200) {
+        console.log("Videos fetched successfully:", response.data);
+        setVideos(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+    }
+  };
   useEffect(() => {
-    getProfile();
+    const token = localStorage.getItem("token");
+    // console.log(token)
+    if (token) {
+      getProfile(token);
+      fetchVideos();
+    } else {
+      setIsLoggedIn(false);
+    }
   }, []);
 
   useGSAP(() => {
@@ -66,8 +70,13 @@ const Home = () => {
      setIsLoggedIn(true);
      navigate("/login");
     }
-  const handleLogout = () => setIsLoggedIn(false);
-
+  const handleLogout = async() =>{ 
+   const res = await axios.get(`${Base_Url}/user/logout`)
+    if (res.status === 200) {
+      setIsLoggedIn(false);
+      localStorage.removeItem("token");
+    }
+  };
   const handleUploadClick = () => setShowUpload(true);
   const handleUploadClose = () => setShowUpload(false);
 
@@ -78,26 +87,30 @@ const Home = () => {
       setUploadData({ ...uploadData, [e.target.name]: e.target.value });
     }
   };
-
-  const handleUploadSubmit = (e) => {
+  const handleUploadSubmit = async(e) => {
     e.preventDefault();
     if (!uploadData.file) return;
-    // Simulate upload
-    setVideos([
-      {
-        id: videos.length + 1,
-        url: URL.createObjectURL(uploadData.file),
-        username: "@you",
-        description: uploadData.description,
-        likes: 0,
-        comments: 0,
-      },
-      ...videos,
-    ]);
-    setShowUpload(false);
-    setUploadData({ description: "", file: null });
+    const formData = new FormData();
+    formData.append("file", uploadData.file);
+    formData.append("description", uploadData.description);
+    try {
+      const response = await axios.post(`${Base_Url}/video/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (response.status === 201) {
+        setVideos([response.data.video, ...videos]);
+        setUploadData({ description: "", file: null });
+        setShowUpload(false);
+        console.log("Video uploaded successfully:", response.data);
+      }
+    } catch (error) {
+      console.error("Error uploading video:", error);
+    }
   };
-
+ 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-500 via-red-500 to-yellow-500 flex flex-col items-center">
       {/* Header */}
@@ -185,12 +198,12 @@ const Home = () => {
       <main className="flex flex-col items-center w-full max-w-lg mt-8 gap-8">
         {videos.map((video) => (
           <div
-            key={video.id}
+            key={video._id}
             className="video-card bg-white/90 rounded-2xl shadow-lg p-4 flex flex-col gap-2 w-full relative overflow-hidden"
           >
-            <VideoAutoPlay src={video.url} />
+            <VideoAutoPlay src={video.videoUrl} />
             <div className="flex items-center gap-2 mt-2">
-              <span className="font-bold text-pink-600">{video.username}</span>
+              <span className="font-bold text-pink-600">@{video.user.username}</span>
               <span className="text-gray-500 text-sm">• {video.description}</span>
             </div>
             <div className="flex gap-6 mt-2">

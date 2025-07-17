@@ -21,6 +21,6 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/user", userRoute);
 app.use("/api/likes", likeRoutes);
-app.use("/api/videos", videoRoutes);
+app.use("/api/video", videoRoutes);
 app.use("/api/comments", commentRoutes);
 export { app as server };

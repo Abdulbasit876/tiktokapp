@@ -39,6 +39,5 @@ const userProfileSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
-
 const UserProfile = mongoose.model("UserProfile", userProfileSchema);
 export default UserProfile;

@@ -4,5 +4,5 @@ import  videoController from "../controllers/videoUpload.js";
 import { authUser } from "../middleware/authUser.js";
 import upload from "../services/Cloudinary.service.js";
 router.post("/upload", authUser, upload.single('file'), videoController.upload);
-router.get("/all", authUser, videoController.getAll);
+router.get("/getAll", authUser, videoController.getAll);
 export default router;
